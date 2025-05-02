@@ -1,2 +1,50 @@
-Bank Loan Problem Statement
-SQL Server Queries
+Main Dax Functions
+Bad Loan
+_% Bad Loan = 
+VAR BadLoan =
+DIVIDE(
+    CALCULATE(
+    _Measure[Total Loan Applications],
+    'bank_loan'[loan_status] = "Charged Off"),
+    '_Measure'[Total Loan Applications], 0)
+
+    RETURN
+    IF(ISBLANK(BadLoan), 0, BadLoan)
+
+Good Loan
+_% Good Loan = 
+VAR GoodLoan = DIVIDE(
+    CALCULATE(
+    _Measure[Total Loan Applications],
+    'bank_loan'[loan_status] IN{"Fully Paid","Current"}),
+    '_Measure'[Total Loan Applications],0)
+RETURN
+IF(ISBLANK(GoodLoan), 0, GoodLoan)
+
+Month-Over-Month Loan Applications
+_MoM Loan Applications = 
+VAR MoMLoanApp =
+CALCULATE(
+    DIVIDE(
+        '_Measure'[_MTD Loan Applications] - '_Measure'[_PTMD Loan Applications],
+        '_Measure'[_PTMD Loan Applications])
+)
+RETURN
+IF(ISBLANK(MoMLoanApp), 0, MoMLoanApp)
+
+Month-To-Date Funded Amount
+_MTD Funded Amount = 
+ VAR MTDFunded =
+CALCULATE(
+    TOTALMTD('_Measure'[_Total Funded Loan],'dim_date'[Date]))
+
+    RETURN
+    IF(ISBLANK(MTDFunded), 0, MTDFunded)
+
+Previous-Month_To-Date Funded Amount
+_PTMD Funded Loan = 
+CALCULATE(
+    TOTALMTD(
+        '_Measure'[_Total Funded Loan],
+         DATEADD(
+            'dim_date'[Date], -1,MONTH)))
